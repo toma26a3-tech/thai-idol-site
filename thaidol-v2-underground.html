@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ThaIdol.info v2 — Underground Design Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.development.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: #080808; }
+  body {
+    background: #080808;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    font-family: 'Inter', 'IBM Plex Sans Thai', 'Noto Sans JP', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  #root { width: 100%; max-width: 430px; position: relative; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* Grain texture overlay */
+  #root::before {
+    content: '';
+    position: fixed;
+    top: 0; left: 50%; transform: translateX(-50%);
+    width: 430px; height: 100vh;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.025;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in { animation: fadeIn 0.35s ease forwards; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+// ── TOKENS ──────────────────────────────────────────────
+const T = {
+  bgVoid:    '#080808',
+  bgBase:    '#111111',
+  bgSurface: '#1A1A1A',
+  bgElevated:'#232323',
+  borderSub: '#252525',
+  borderMid: '#333333',
+  textPri:   '#F0EDE8',
+  textSec:   '#A8A49E',
+  textMuted: '#5C5855',
+  neon:      '#FF1F6E',
+  cyan:      '#00E5C8',
+  lime:      '#C8F135',
+  gold:      '#D4A853',
+};
+
+// ── MOCK DATA ────────────────────────────────────────────
+const EVENTS = [
+  { id:'E1', date:'2025-05-17', wd:'SAT', startTime:'18:00', openTime:'17:30',
+    title:'CANDY PARADE', sub:'Spring Edition',
+    venue:'RCA Plaza', area:'RCA', city:'Bangkok',
+    acts:['SugarBite','Candy Pop'],
+    priceMin:300, priceMax:500, ticketUrl:'#',
+    desc:'春の大型合同ライブ。物販・チェキ会あり。日本語スタッフ対応可。',
+    sourceUrl:'#', checked:'2025-05-15', tags:['jp-friendly','beginner'],
+    isToday:true, isFree:false },
+  { id:'E2', date:'2025-05-17', wd:'SAT', startTime:'20:00', openTime:'19:30',
+    title:'MILK & HONEY', sub:'Night Session vol.3',
+    venue:'Thonglor Live House', area:'Thonglor', city:'Bangkok',
+    acts:['BNK48'],
+    priceMin:500, priceMax:500, ticketUrl:'#',
+    desc:'BNK48の単独ライブ。アットホームな雰囲気で近距離でアイドルを見られる。',
+    sourceUrl:'#', checked:'2025-05-16', tags:['jp-friendly'],
+    isToday:true, isFree:false },
+  { id:'E3', date:'2025-05-18', wd:'SUN', startTime:'14:00', openTime:'13:30',
+    title:'STARLIGHT FES', sub:'vol.8',
+    venue:'Siam Square One', area:'Siam', city:'Bangkok',
+    acts:['Rosé Girls','Candy Pop','SugarBite'],
+    priceMin:0, priceMax:0, ticketUrl:null,
+    desc:'無料の屋外フェス。3グループ出演。',
+    sourceUrl:'#', checked:'2025-05-14', tags:['beginner','free'],
+    isToday:false, isFree:true },
+  { id:'E4', date:'2025-05-24', wd:'SAT', startTime:'18:30', openTime:'18:00',
+    title:'CHIANG MAI IDOL NIGHT', sub:null,
+    venue:'Nimman Hall', area:'Nimman', city:'Chiang Mai',
+    acts:['NorthStar Girls'],
+    priceMin:200, priceMax:300, ticketUrl:'#',
+    desc:'チェンマイ最大の屋内アイドルライブ。',
+    sourceUrl:'#', checked:'2025-05-13', tags:['beginner'],
+    isToday:false, isFree:false },
+];
+
+const ARTISTS = [
+  { id:'A1', name:'BNK48', genre:'J-POP STYLE', area:'BANGKOK', status:'ACTIVE',
+    freq:'HIGH', jpFriendly:true, debut:2017, agency:'BNK48 Office',
+    desc:'AKB48の姉妹グループとしてタイで結成。タイのアイドルシーンをリードする存在。' },
+  { id:'A2', name:'SugarBite', genre:'CUTE IDOL / POP', area:'BANGKOK', status:'ACTIVE',
+    freq:'HIGH', jpFriendly:true, debut:2021, agency:'Sweet Production',
+    desc:'可愛らしいコンセプトで人気急上昇中。ライブ頻度が高い。' },
+  { id:'A3', name:'Candy Pop', genre:'DANCE / POP', area:'BANGKOK', status:'ACTIVE',
+    freq:'MED', jpFriendly:false, debut:2020, agency:'Pop Stage',
+    desc:'ダンスの実力派。パフォーマンスの完成度が高い。' },
+  { id:'A4', name:'Rosé Girls', genre:'ELEGANT IDOL', area:'BANGKOK', status:'ACTIVE',
+    freq:'MED', jpFriendly:false, debut:2019, agency:'Bloom Agency',
+    desc:'上品なコンセプト。女性ファンからも人気。' },
+  { id:'A5', name:'NorthStar Girls', genre:'LOCAL IDOL', area:'CHIANG MAI', status:'ACTIVE',
+    freq:'LOW', jpFriendly:false, debut:2022, agency:'North Entertainment',
+    desc:'チェンマイ発。北タイのシーンを代表する存在。' },
+  { id:'A6', name:'Moon Prism', genre:'IDOL', area:'BANGKOK', status:'HIATUS',
+    freq:'—', jpFriendly:false, debut:2020, agency:'Lunar Arts',
+    desc:'現在活動休止中。' },
+];
+
+// ── UTILS ────────────────────────────────────────────────
+const fmtPrice = (ev) => {
+  if(ev.isFree) return 'FREE';
+  if(ev.priceMin === ev.priceMax) return `${ev.priceMin} THB`;
+  return `${ev.priceMin}–${ev.priceMax} THB`;
+};
+
+// ── ATOMS ────────────────────────────────────────────────
+
+function Badge({ type }) {
+  const cfg = {
+    free:       { label:'FREE',        color: T.lime },
+    beginner:   { label:'BEGINNER',    color: T.textSec },
+    'jp-friendly':{ label:'JP FRIENDLY', color: T.textSec },
+  };
+  const c = cfg[type];
+  if(!c) return null;
+  return (
+    <span style={{
+      fontSize:9, fontWeight:700, letterSpacing:'0.12em',
+      padding:'2px 7px', border:`1px solid ${c.color}`,
+      color:c.color, display:'inline-block', lineHeight:1.6,
+      fontFamily:'Inter, sans-serif', textTransform:'uppercase',
+    }}>{c.label}</span>
+  );
+}
+
+function SectionHead({ children, right }) {
+  return (
+    <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:20 }}>
+      <span style={{
+        fontSize:10, fontWeight:700, letterSpacing:'0.18em',
+        color:T.textMuted, textTransform:'uppercase', fontFamily:'Inter, sans-serif',
+      }}>{children}</span>
+      {right && <span style={{ fontSize:10, color:T.cyan, cursor:'pointer', letterSpacing:'0.08em', fontFamily:'Inter, sans-serif' }}>{right}</span>}
+    </div>
+  );
+}
+
+function Divider() {
+  return <div style={{ height:1, background:T.borderSub, margin:'0 0' }} />;
+}
+
+// ── NAV ──────────────────────────────────────────────────
+function NavBar({ page, setPage }) {
+  return (
+    <div style={{
+      background: T.bgVoid, borderBottom:`1px solid ${T.borderSub}`,
+      padding:'0 16px', display:'flex', alignItems:'center',
+      justifyContent:'space-between', position:'sticky', top:0, zIndex:200,
+    }}>
+      <div onClick={()=>setPage('home')} style={{ cursor:'pointer', padding:'12px 0' }}>
+        <span style={{
+          fontFamily:'IBM Plex Mono, monospace', fontSize:13, fontWeight:400,
+          color:T.textPri, letterSpacing:'-0.01em',
+        }}>thaidol<span style={{ color:T.neon }}>.info</span></span>
+      </div>
+      <div style={{ display:'flex', alignItems:'center', gap:4 }}>
+        {[{id:'events',l:'EVENTS'},{id:'artists',l:'ARTISTS'},{id:'guide',l:'GUIDE'}].map(n=>(
+          <button key={n.id} onClick={()=>setPage(n.id)} style={{
+            fontSize:9, letterSpacing:'0.14em', padding:'6px 8px',
+            border:'none', cursor:'pointer', background:'transparent',
+            color: page===n.id ? T.textPri : T.textMuted,
+            fontFamily:'Inter, sans-serif', fontWeight:600, textTransform:'uppercase',
+            borderBottom: page===n.id ? `1px solid ${T.neon}` : '1px solid transparent',
+          }}>{n.l}</button>
+        ))}
+        <div style={{ marginLeft:8, display:'flex', border:`1px solid ${T.borderMid}`, overflow:'hidden' }}>
+          <span style={{ fontSize:9, padding:'4px 8px', background:T.bgSurface, color:T.textPri, fontFamily:'Inter', fontWeight:600, letterSpacing:'0.08em' }}>JP</span>
+          <span style={{ fontSize:9, padding:'4px 8px', color:T.textMuted, fontFamily:'Inter', letterSpacing:'0.08em' }}>TH</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── EVENT CARD (Flyer Style) ──────────────────────────────
+function EventCard({ ev, onSelect, variant='card' }) {
+  const [hov, setHov] = useState(false);
+  const badge = ev.isFree ? 'free' : ev.tags.includes('beginner') ? 'beginner' : ev.tags.includes('jp-friendly') ? 'jp-friendly' : null;
+
+  if(variant === 'row') {
+    return (
+      <div onClick={()=>onSelect&&onSelect(ev)}
+        onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+        style={{
+          display:'flex', alignItems:'center', gap:16,
+          padding:'14px 16px', cursor:'pointer',
+          background: hov ? T.bgSurface : 'transparent',
+          borderBottom:`1px solid ${T.borderSub}`,
+          transition:'background 0.12s',
+        }}>
+        <div style={{ flexShrink:0, width:52, textAlign:'right' }}>
+          <div style={{ fontFamily:'IBM Plex Mono', fontSize:18, fontWeight:300, color:T.textPri, lineHeight:1 }}>{ev.startTime}</div>
+          <div style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted, marginTop:2 }}>OPEN {ev.openTime}</div>
+        </div>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ fontSize:13, fontWeight:700, color:T.textPri, textTransform:'uppercase', letterSpacing:'-0.01em', lineHeight:1.2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{ev.title}</div>
+          {ev.sub && <div style={{ fontSize:10, color:T.textSec, marginTop:2 }}>{ev.sub}</div>}
+          <div style={{ fontSize:11, color:T.textSec, marginTop:4 }}>
+            {ev.venue} <span style={{ color:T.textMuted }}>— {ev.area}</span>
+          </div>
+          <div style={{ marginTop:4, display:'flex', gap:4, flexWrap:'wrap', alignItems:'center' }}>
+            <span style={{ fontSize:10, color:T.textMuted }}>{ev.acts.join(' + ')}</span>
+            {badge && <Badge type={badge}/>}
+          </div>
+        </div>
+        <div style={{ flexShrink:0, textAlign:'right' }}>
+          <div style={{ fontSize:10, color: ev.isFree ? T.lime : T.textMuted, fontFamily:'IBM Plex Mono', letterSpacing:'0.04em' }}>{fmtPrice(ev)}</div>
+          <div style={{ fontSize:9, color:T.cyan, marginTop:6, letterSpacing:'0.08em', fontWeight:600, cursor:'pointer' }}>
+            {ev.ticketUrl ? 'TICKET →' : 'SNS →'}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // card variant (for today scroll)
+  return (
+    <div onClick={()=>onSelect&&onSelect(ev)}
+      onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}
+      style={{
+        flexShrink:0, width:200,
+        border:`1px solid ${ev.isToday ? T.neon : T.borderSub}`,
+        background: hov ? T.bgElevated : T.bgSurface,
+        cursor:'pointer', transition:'background 0.12s',
+        padding:'16px',
+      }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:14 }}>
+        <div style={{ fontFamily:'IBM Plex Mono', fontSize:26, fontWeight:300, color:T.textPri, lineHeight:1 }}>{ev.startTime}</div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:9, fontWeight:700, color:T.textMuted, letterSpacing:'0.12em', textTransform:'uppercase' }}>{ev.wd}</div>
+          <div style={{ fontFamily:'IBM Plex Mono', fontSize:14, color:T.gold, lineHeight:1.2 }}>{ev.date.slice(8)}</div>
+        </div>
+      </div>
+      <Divider/>
+      <div style={{ marginTop:12 }}>
+        <div style={{ fontSize:13, fontWeight:800, color:T.textPri, textTransform:'uppercase', letterSpacing:'-0.01em', lineHeight:1.2, marginBottom:4 }}>{ev.title}</div>
+        {ev.sub && <div style={{ fontSize:10, color:T.textSec, marginBottom:10 }}>{ev.sub}</div>}
+        <div style={{ fontSize:11, color:T.textSec, marginBottom:4 }}>{ev.venue}</div>
+        <div style={{ fontSize:10, color:T.textMuted, marginBottom:10 }}>{ev.acts.join(' × ')}</div>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <div style={{ fontSize:10, color: ev.isFree ? T.lime : T.textMuted, fontFamily:'IBM Plex Mono' }}>{fmtPrice(ev)}</div>
+          {badge && <Badge type={badge}/>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── EVENT DETAIL ──────────────────────────────────────────
+function EventDetail({ ev, setPage }) {
+  if(!ev) return null;
+  const badge = ev.isFree ? 'free' : ev.tags.includes('beginner') ? 'beginner' : ev.tags.includes('jp-friendly') ? 'jp-friendly' : null;
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+      {/* Info disclaimer */}
+      <div style={{ background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}`, padding:'8px 16px' }}>
+        <span style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted, letterSpacing:'0.06em' }}>
+          INFO AS OF {ev.checked} — VERIFY WITH ORGANIZER BEFORE ATTENDING
+        </span>
+      </div>
+
+      {/* Header block */}
+      <div style={{ padding:'32px 16px 24px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.neon, marginBottom:8, textTransform:'uppercase' }}>
+          {ev.wd} {ev.date} — {ev.area}, {ev.city}
+        </div>
+        <div style={{ fontSize:28, fontWeight:900, color:T.textPri, textTransform:'uppercase', letterSpacing:'-0.02em', lineHeight:1.1, marginBottom:6 }}>{ev.title}</div>
+        {ev.sub && <div style={{ fontSize:14, color:T.textSec, marginBottom:16 }}>{ev.sub}</div>}
+        {badge && <Badge type={badge}/>}
+      </div>
+
+      {/* Time + Venue block */}
+      <div style={{ padding:'24px 16px', borderBottom:`1px solid ${T.borderSub}`, display:'grid', gridTemplateColumns:'1fr 1fr', gap:24 }}>
+        <div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:6, textTransform:'uppercase' }}>START</div>
+          <div style={{ fontFamily:'IBM Plex Mono', fontSize:36, fontWeight:300, color:T.textPri, lineHeight:1 }}>{ev.startTime}</div>
+          <div style={{ fontSize:10, color:T.textMuted, marginTop:4 }}>DOORS {ev.openTime}</div>
+        </div>
+        <div>
+          <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:6, textTransform:'uppercase' }}>VENUE</div>
+          <div style={{ fontSize:16, fontWeight:700, color:T.textPri, lineHeight:1.3 }}>{ev.venue}</div>
+          <div style={{ fontSize:11, color:T.textSec, marginTop:4 }}>{ev.area} / {ev.city}</div>
+          <div style={{ fontSize:10, color:T.cyan, marginTop:8, cursor:'pointer', letterSpacing:'0.08em', fontWeight:600 }}>MAP →</div>
+        </div>
+      </div>
+
+      {/* Acts */}
+      <div style={{ padding:'24px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:12, textTransform:'uppercase' }}>LINE-UP</div>
+        {ev.acts.map(a => (
+          <div key={a} style={{ fontSize:16, fontWeight:700, color:T.textPri, marginBottom:6, letterSpacing:'-0.01em' }}>{a}</div>
+        ))}
+      </div>
+
+      {/* Ticket */}
+      <div style={{ padding:'24px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:12, textTransform:'uppercase' }}>TICKET</div>
+        <div style={{ fontFamily:'IBM Plex Mono', fontSize:22, color: ev.isFree ? T.lime : T.textPri, marginBottom:16 }}>{fmtPrice(ev)}</div>
+        <button style={{
+          width:'100%', padding:'14px', background: ev.ticketUrl ? T.neon : 'transparent',
+          color: ev.ticketUrl ? '#000' : T.textSec,
+          border:`1px solid ${ev.ticketUrl ? T.neon : T.borderMid}`,
+          fontSize:11, fontWeight:700, letterSpacing:'0.14em', textTransform:'uppercase',
+          cursor:'pointer', fontFamily:'Inter, sans-serif',
+        }}>
+          {ev.ticketUrl ? 'GET TICKET' : 'CHECK ORGANIZER SNS'}
+        </button>
+      </div>
+
+      {/* Description */}
+      <div style={{ padding:'24px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:12, textTransform:'uppercase' }}>ABOUT</div>
+        <div style={{ fontSize:13, color:T.textSec, lineHeight:1.8 }}>{ev.desc}</div>
+      </div>
+
+      {/* Source */}
+      <div style={{ padding:'24px 16px' }}>
+        <div style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted, marginBottom:12, letterSpacing:'0.06em' }}>
+          SOURCE: {ev.sourceUrl} / CHECKED: {ev.checked}
+        </div>
+        <button style={{ fontSize:9, fontWeight:600, letterSpacing:'0.12em', color:T.textMuted, background:'none', border:`1px solid ${T.borderMid}`, padding:'8px 14px', cursor:'pointer', textTransform:'uppercase', fontFamily:'Inter' }}>
+          VERIFY OFFICIAL INFO →
+        </button>
+      </div>
+
+      <div style={{ padding:'0 16px 32px', textAlign:'center' }}>
+        <button onClick={()=>setPage('events')} style={{ fontSize:10, color:T.textMuted, background:'none', border:'none', cursor:'pointer', letterSpacing:'0.1em', textTransform:'uppercase' }}>
+          ← BACK TO EVENTS
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── HOME ──────────────────────────────────────────────────
+function HomePage({ setPage, setSE }) {
+  const today = EVENTS.filter(e => e.isToday);
+  const weekend = EVENTS;
+  const grouped = weekend.reduce((a,e)=>{ if(!a[e.date])a[e.date]=[];a[e.date].push(e);return a; },{});
+
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+
+      {/* HERO */}
+      <div style={{
+        background:`linear-gradient(170deg, #0D0D0D 0%, #111 60%, #0A0A0A 100%)`,
+        padding:'48px 16px 40px', position:'relative', overflow:'hidden',
+        borderBottom:`1px solid ${T.borderSub}`,
+      }}>
+        {/* BG text watermark */}
+        <div style={{
+          position:'absolute', bottom:-20, right:-10, fontSize:120, fontWeight:900,
+          color:'rgba(255,255,255,0.02)', fontFamily:'Inter', lineHeight:1,
+          textTransform:'uppercase', letterSpacing:'-0.05em', userSelect:'none',
+          pointerEvents:'none',
+        }}>IDOL</div>
+
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.25em', color:T.neon, marginBottom:16, textTransform:'uppercase', fontFamily:'Inter' }}>
+          Bangkok Underground Idol Scene
+        </div>
+        <div style={{
+          fontSize:38, fontWeight:900, color:T.textPri, lineHeight:1.05,
+          textTransform:'uppercase', letterSpacing:'-0.03em', marginBottom:8, fontFamily:'Inter',
+        }}>
+          Tonight<br/>in Bangkok
+        </div>
+        <div style={{ fontSize:13, color:T.textSec, marginBottom:32, lineHeight:1.6 }}>
+          タイ地下アイドルシーンへの入口
+        </div>
+
+        {/* Live count */}
+        <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:24 }}>
+          <div style={{ width:6, height:6, borderRadius:'50%', background:T.neon, boxShadow:`0 0 6px ${T.neon}` }}/>
+          <span style={{ fontFamily:'IBM Plex Mono', fontSize:11, color:T.textSec, letterSpacing:'0.06em' }}>
+            TODAY — <span style={{ color:T.textPri }}>{today.length} EVENTS</span>
+          </span>
+        </div>
+
+        <button onClick={()=>setPage('events')} style={{
+          width:'100%', padding:'14px 20px',
+          background:'transparent', border:`1px solid ${T.neon}`,
+          color:T.neon, fontSize:11, fontWeight:700, letterSpacing:'0.18em',
+          textTransform:'uppercase', cursor:'pointer', fontFamily:'Inter',
+          display:'flex', justifyContent:'space-between', alignItems:'center',
+          transition:'background 0.15s',
+        }}
+          onMouseEnter={e=>e.currentTarget.style.background='rgba(255,31,110,0.08)'}
+          onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+        >
+          <span>今夜のライブを見る</span>
+          <span style={{ fontFamily:'IBM Plex Mono', fontWeight:300 }}>→</span>
+        </button>
+      </div>
+
+      {/* DATE STRIP */}
+      <div style={{ display:'flex', gap:0, overflowX:'auto', borderBottom:`1px solid ${T.borderSub}`, background:T.bgVoid }}>
+        {['TODAY','TOMORROW','SAT','SUN','THIS MONTH','ALL'].map((d,i)=>(
+          <div key={d} style={{
+            flexShrink:0, fontSize:9, padding:'10px 14px',
+            borderRight:`1px solid ${T.borderSub}`,
+            color: i===0 ? T.neon : T.textMuted,
+            fontFamily:'IBM Plex Mono', letterSpacing:'0.08em',
+            cursor:'pointer',
+            borderBottom: i===0 ? `1px solid ${T.neon}` : '1px solid transparent',
+          }}>{d}</div>
+        ))}
+      </div>
+
+      {/* TODAY */}
+      {today.length > 0 && (
+        <div style={{ padding:'32px 0 0' }}>
+          <div style={{ padding:'0 16px' }}><SectionHead right="ALL EVENTS →">Tonight</SectionHead></div>
+          <div style={{ display:'flex', gap:8, overflowX:'auto', padding:'0 16px 32px', WebkitOverflowScrolling:'touch' }}>
+            {today.map(ev=>(
+              <EventCard key={ev.id} ev={ev} variant="card" onSelect={ev=>{setSE(ev);setPage('event-detail');}}/>
+            ))}
+          </div>
+          <Divider/>
+        </div>
+      )}
+
+      {/* WEEKEND */}
+      <div style={{ padding:'32px 0 0' }}>
+        <div style={{ padding:'0 16px' }}><SectionHead right="SEE ALL →">This Weekend</SectionHead></div>
+        {Object.keys(grouped).sort().map(date=>{
+          const d=new Date(date);
+          const label=`${['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()]} ${d.getDate()} MAY`;
+          return (
+            <div key={date}>
+              <div style={{ padding:'8px 16px', background:T.bgVoid, borderTop:`1px solid ${T.borderSub}`, borderBottom:`1px solid ${T.borderSub}` }}>
+                <span style={{ fontFamily:'IBM Plex Mono', fontSize:10, color:T.textMuted, letterSpacing:'0.1em' }}>{label}</span>
+              </div>
+              {grouped[date].map(ev=>(
+                <EventCard key={ev.id} ev={ev} variant="row" onSelect={ev=>{setSE(ev);setPage('event-detail');}}/>
+              ))}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* GUIDE STRIP */}
+      <div style={{ margin:'32px 16px', padding:'20px', background:T.bgSurface, border:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.textMuted, marginBottom:8, textTransform:'uppercase' }}>For First Timers</div>
+        <div style={{ fontSize:14, fontWeight:700, color:T.textPri, marginBottom:6 }}>タイ地下アイドルライブ、初めて？</div>
+        <div style={{ fontSize:12, color:T.textSec, marginBottom:14, lineHeight:1.7 }}>チケットの買い方から会場アクセス、チェキ文化まで。</div>
+        <button onClick={()=>{}} style={{ fontSize:9, fontWeight:700, letterSpacing:'0.14em', color:T.cyan, background:'none', border:`1px solid ${T.cyan}`, padding:'8px 14px', cursor:'pointer', textTransform:'uppercase', fontFamily:'Inter' }}>
+          READ THE GUIDE →
+        </button>
+      </div>
+
+      {/* FOOTER */}
+      <div style={{ padding:'24px 16px 32px', borderTop:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontFamily:'IBM Plex Mono', fontSize:10, color:T.textMuted, marginBottom:8 }}>thaidol.info</div>
+        <div style={{ fontSize:9, color:T.textMuted, lineHeight:1.7, marginBottom:16 }}>
+          Non-official information guide. Always verify with official organizer SNS before attending.
+        </div>
+        <div style={{ display:'flex', gap:16, flexWrap:'wrap' }}>
+          {['ABOUT','REPORT ERROR','X / TWITTER','CONTACT'].map(l=>(
+            <span key={l} style={{ fontSize:9, color:T.textMuted, letterSpacing:'0.1em', cursor:'pointer', fontWeight:600, textTransform:'uppercase', fontFamily:'Inter' }}>{l}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── EVENTS PAGE ───────────────────────────────────────────
+function EventsPage({ setPage, setSE }) {
+  const [df, setDf] = useState('all');
+  const [af, setAf] = useState('all');
+  const [tf, setTf] = useState('all');
+
+  const filtered = EVENTS.filter(ev => {
+    if(df==='today'&&!ev.isToday) return false;
+    if(df==='weekend'&&!['2025-05-17','2025-05-18'].includes(ev.date)) return false;
+    if(af!=='all'&&!ev.city.toLowerCase().includes(af)) return false;
+    if(tf==='free'&&!ev.isFree) return false;
+    if(tf==='jp'&&!ev.tags.includes('jp-friendly')) return false;
+    return true;
+  });
+  const grouped = filtered.reduce((a,e)=>{ if(!a[e.date])a[e.date]=[];a[e.date].push(e);return a; },{});
+
+  const filterBtn = (active, onClick, label) => (
+    <div onClick={onClick} style={{
+      flexShrink:0, fontSize:9, padding:'6px 12px', cursor:'pointer',
+      fontFamily:'IBM Plex Mono', letterSpacing:'0.08em', textTransform:'uppercase',
+      background: active ? T.bgSurface : 'transparent',
+      color: active ? T.textPri : T.textMuted,
+      border:`1px solid ${active ? T.borderMid : T.borderSub}`,
+    }}>{label}</div>
+  );
+
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+      <div style={{ background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}`, padding:'16px 16px 0' }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.textMuted, marginBottom:12, textTransform:'uppercase', fontFamily:'Inter' }}>Events</div>
+        {/* Date filter */}
+        <div style={{ display:'flex', gap:6, overflowX:'auto', marginBottom:8, paddingBottom:12 }}>
+          {[{id:'all',l:'ALL'},{id:'today',l:'TODAY'},{id:'weekend',l:'WEEKEND'}].map(c=>
+            filterBtn(df===c.id, ()=>setDf(c.id), c.l)
+          )}
+        </div>
+        {/* Extra filters */}
+        <div style={{ display:'flex', gap:6, overflowX:'auto', paddingBottom:12 }}>
+          {filterBtn(af==='all',()=>setAf('all'),'ALL AREAS')}
+          {filterBtn(af==='bangkok',()=>setAf('bangkok'),'BANGKOK')}
+          {filterBtn(af==='chiang mai',()=>setAf('chiang mai'),'CHIANG MAI')}
+          <div style={{ width:1, background:T.borderSub, flexShrink:0 }}/>
+          {filterBtn(tf==='free',()=>setTf(tf==='free'?'all':'free'),'FREE')}
+          {filterBtn(tf==='jp',()=>setTf(tf==='jp'?'all':'jp'),'JP FRIENDLY')}
+        </div>
+      </div>
+
+      {/* Warning */}
+      <div style={{ background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}`, padding:'8px 16px' }}>
+        <span style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted, letterSpacing:'0.04em' }}>
+          VERIFY ALL INFO WITH ORGANIZER BEFORE ATTENDING
+        </span>
+      </div>
+
+      {/* List */}
+      {Object.keys(grouped).sort().map(date=>{
+        const d=new Date(date);
+        const label=`${['SUN','MON','TUE','WED','THU','FRI','SAT'][d.getDay()]} ${d.getDate()} MAY 2025`;
+        return (
+          <div key={date}>
+            <div style={{ padding:'10px 16px', background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}` }}>
+              <span style={{ fontFamily:'IBM Plex Mono', fontSize:10, color:T.textMuted, letterSpacing:'0.1em' }}>{label}</span>
+              <span style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted, marginLeft:12 }}>{grouped[date].length} EVENTS</span>
+            </div>
+            {grouped[date].map(ev=>(
+              <EventCard key={ev.id} ev={ev} variant="row" onSelect={ev=>{setSE(ev);setPage('event-detail');}}/>
+            ))}
+          </div>
+        );
+      })}
+      {filtered.length===0 && (
+        <div style={{ padding:'48px 16px', textAlign:'center' }}>
+          <div style={{ fontFamily:'IBM Plex Mono', fontSize:11, color:T.textMuted, letterSpacing:'0.1em' }}>NO EVENTS FOUND</div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── ARTISTS PAGE ──────────────────────────────────────────
+function ArtistsPage({ setPage, setSA }) {
+  const [jpFilter, setJpFilter] = useState(false);
+  const [activeOnly, setActiveOnly] = useState(false);
+  const filtered = ARTISTS.filter(a => {
+    if(jpFilter && !a.jpFriendly) return false;
+    if(activeOnly && a.status!=='ACTIVE') return false;
+    return true;
+  });
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+      <div style={{ background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}`, padding:'16px 16px 12px' }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.textMuted, marginBottom:12, textTransform:'uppercase', fontFamily:'Inter' }}>
+          Artists <span style={{ color:T.textMuted, fontWeight:400 }}>— {filtered.length} groups</span>
+        </div>
+        <div style={{ display:'flex', gap:6 }}>
+          {[
+            { label:'ACTIVE ONLY', active:activeOnly, fn:()=>setActiveOnly(!activeOnly) },
+            { label:'JP FRIENDLY', active:jpFilter, fn:()=>setJpFilter(!jpFilter) },
+          ].map(b=>(
+            <div key={b.label} onClick={b.fn} style={{
+              fontSize:9, padding:'6px 12px', cursor:'pointer',
+              fontFamily:'IBM Plex Mono', letterSpacing:'0.08em',
+              background: b.active ? T.bgSurface : 'transparent',
+              color: b.active ? T.textPri : T.textMuted,
+              border:`1px solid ${b.active ? T.borderMid : T.borderSub}`,
+            }}>{b.label}</div>
+          ))}
+        </div>
+      </div>
+
+      {/* Artist list */}
+      <div>
+        {filtered.map(a=>{
+          const hiatus = a.status==='HIATUS';
+          return (
+            <div key={a.id} onClick={()=>{setSA(a);setPage('artist-detail');}}
+              style={{
+                borderBottom:`1px solid ${T.borderSub}`, padding:'20px 16px',
+                cursor:'pointer', opacity: hiatus ? 0.4 : 1,
+                display:'flex', alignItems:'flex-start', gap:16,
+              }}
+              onMouseEnter={e=>e.currentTarget.style.background=T.bgSurface}
+              onMouseLeave={e=>e.currentTarget.style.background='transparent'}
+            >
+              {/* Name initial block */}
+              <div style={{
+                flexShrink:0, width:48, height:48,
+                background:T.bgSurface, border:`1px solid ${T.borderMid}`,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontFamily:'Inter', fontSize:18, fontWeight:900, color:T.textMuted,
+              }}>{a.name[0]}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:15, fontWeight:800, color:T.textPri, letterSpacing:'-0.01em', marginBottom:4 }}>{a.name}</div>
+                <div style={{ fontSize:9, fontWeight:700, color:T.textMuted, letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:4 }}>
+                  {a.genre} &nbsp;/&nbsp; {a.area}
+                </div>
+                <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                  <span style={{ fontFamily:'IBM Plex Mono', fontSize:9, color:T.textMuted }}>
+                    {a.status} &nbsp;·&nbsp; FREQ: {a.freq}
+                  </span>
+                  {a.jpFriendly && <Badge type="jp-friendly"/>}
+                </div>
+              </div>
+              <div style={{ fontSize:11, color:T.textMuted, alignSelf:'center' }}>→</div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── ARTIST DETAIL ─────────────────────────────────────────
+function ArtistDetail({ artist, setPage }) {
+  if(!artist) return null;
+  const upcomingEvents = EVENTS.filter(e => e.acts.includes(artist.name));
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+      <div style={{ padding:'32px 16px 24px', borderBottom:`1px solid ${T.borderSub}`, background:T.bgVoid }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.textMuted, marginBottom:12, textTransform:'uppercase', fontFamily:'Inter' }}>Artist</div>
+        <div style={{ fontSize:32, fontWeight:900, color:T.textPri, letterSpacing:'-0.02em', marginBottom:8 }}>{artist.name}</div>
+        <div style={{ fontSize:10, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, textTransform:'uppercase', marginBottom:12 }}>{artist.genre}</div>
+        {artist.jpFriendly && <Badge type="jp-friendly"/>}
+      </div>
+
+      {/* Stats */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', borderBottom:`1px solid ${T.borderSub}` }}>
+        {[
+          { l:'STATUS', v:artist.status },
+          { l:'SINCE', v:artist.debut },
+          { l:'LIVES', v:artist.freq },
+        ].map(item=>(
+          <div key={item.l} style={{ padding:'16px', borderRight:`1px solid ${T.borderSub}` }}>
+            <div style={{ fontSize:8, letterSpacing:'0.18em', color:T.textMuted, marginBottom:6, textTransform:'uppercase', fontFamily:'Inter', fontWeight:700 }}>{item.l}</div>
+            <div style={{ fontFamily:'IBM Plex Mono', fontSize:14, color:T.textPri }}>{item.v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Area / Agency */}
+      <div style={{ padding:'20px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:6, textTransform:'uppercase', fontFamily:'Inter' }}>Base</div>
+        <div style={{ fontSize:13, color:T.textSec }}>{artist.area} — {artist.agency}</div>
+      </div>
+
+      {/* Description */}
+      <div style={{ padding:'20px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, marginBottom:10, textTransform:'uppercase', fontFamily:'Inter' }}>About</div>
+        <div style={{ fontSize:13, color:T.textSec, lineHeight:1.8 }}>{artist.desc}</div>
+      </div>
+
+      {/* Upcoming */}
+      {upcomingEvents.length>0 && (
+        <div style={{ borderBottom:`1px solid ${T.borderSub}` }}>
+          <div style={{ padding:'20px 16px 8px' }}>
+            <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.16em', color:T.textMuted, textTransform:'uppercase', fontFamily:'Inter' }}>Upcoming</div>
+          </div>
+          {upcomingEvents.map(ev=>(
+            <div key={ev.id} style={{ padding:'12px 16px', borderTop:`1px solid ${T.borderSub}`, display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+              <div>
+                <div style={{ fontSize:12, fontWeight:700, color:T.textPri }}>{ev.title}</div>
+                <div style={{ fontFamily:'IBM Plex Mono', fontSize:10, color:T.textMuted, marginTop:2 }}>{ev.date} · {ev.startTime} · {ev.venue}</div>
+              </div>
+              <div style={{ fontFamily:'IBM Plex Mono', fontSize:10, color: ev.isFree?T.lime:T.textMuted }}>{fmtPrice(ev)}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ padding:'24px 16px', textAlign:'center' }}>
+        <button onClick={()=>setPage('artists')} style={{ fontSize:9, fontWeight:600, letterSpacing:'0.14em', color:T.textMuted, background:'none', border:'none', cursor:'pointer', textTransform:'uppercase', fontFamily:'Inter' }}>
+          ← ALL ARTISTS
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ── GUIDE PAGE ────────────────────────────────────────────
+function GuidePage() {
+  const [tab, setTab] = useState('jp');
+  const sections = tab==='jp' ? [
+    { title:'チケットの買い方', body:'タイのアイドルライブのチケットは主にEventpopで購入できます。クレジットカードが使えます。当日券も多いですが、人気イベントは事前購入がおすすめです。' },
+    { title:'会場への行き方', body:'バンコク市内の会場はBTS（スカイトレイン）やMRT（地下鉄）でアクセスできます。GoogleマップにBTS/MRT駅名を入れて検索するのが最も簡単です。' },
+    { title:'チェキ文化', body:'タイのアイドルライブでもチェキ（インスタントフォト）が撮れることがあります。価格は100〜300 THBが目安。会場の物販コーナーで案内されています。' },
+    { title:'物販の流れ', body:'開場前または終演後に物販（グッズ販売）が行われます。タイバーツの現金を用意しておくとスムーズです。' },
+    { title:'使えるタイ語フレーズ', body:'コップンカップ（ありがとう） / チャン チョープ（好きです） / ライブでは「สู้ๆ（シュー・シュー）」が応援の言葉です。' },
+  ] : [
+    { title:'日本式アイドル文化とは', body:'日本のアイドルは「会いに行ける」をコンセプトにした近距離ファン文化が特徴です。握手会、チェキ、コール（掛け声）などが主な文化です。' },
+    { title:'チェキ文化', body:'チェキとはアイドルとインスタント写真を撮ること。撮影後にサインをもらえることもあります。' },
+    { title:'コール文化', body:'曲に合わせて特定のフレーズを叫ぶ「コール」は日本のアイドルライブの醍醐味。まわりに合わせると楽しめます。' },
+    { title:'日本人ファンへ届けるメリット', body:'グループが日本語情報を発信すると、タイに訪問する日本人観光客がライブに来てくれる可能性があります。掲載依頼はフォームからどうぞ。' },
+  ];
+
+  return (
+    <div className="fade-in" style={{ background:T.bgBase, minHeight:'100vh' }}>
+      <div style={{ background:T.bgVoid, borderBottom:`1px solid ${T.borderSub}`, padding:'16px' }}>
+        <div style={{ fontSize:9, fontWeight:700, letterSpacing:'0.2em', color:T.textMuted, marginBottom:12, textTransform:'uppercase', fontFamily:'Inter' }}>Guide</div>
+        <div style={{ display:'flex', gap:0 }}>
+          {[{id:'jp',l:'FOR JAPANESE FANS'},{id:'th',l:'FOR THAI FANS'}].map(t=>(
+            <div key={t.id} onClick={()=>setTab(t.id)} style={{
+              padding:'8px 14px', fontSize:9, cursor:'pointer',
+              fontFamily:'IBM Plex Mono', letterSpacing:'0.08em',
+              color: tab===t.id ? T.textPri : T.textMuted,
+              borderBottom: tab===t.id ? `1px solid ${T.neon}` : `1px solid ${T.borderSub}`,
+              background: tab===t.id ? T.bgSurface : 'transparent',
+            }}>{t.l}</div>
+          ))}
+        </div>
+      </div>
+      <div style={{ padding:'0' }}>
+        {sections.map((s,i)=>(
+          <div key={i} style={{ padding:'24px 16px', borderBottom:`1px solid ${T.borderSub}` }}>
+            <div style={{ fontSize:12, fontWeight:700, color:T.textPri, marginBottom:10, letterSpacing:'-0.01em' }}>{s.title}</div>
+            <div style={{ fontSize:12, color:T.textSec, lineHeight:1.8 }}>{s.body}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ── BOTTOM NAV ────────────────────────────────────────────
+function BottomNav({ page, setPage }) {
+  const items = [
+    {id:'home',l:'HOME'},{id:'events',l:'EVENTS'},{id:'artists',l:'ARTISTS'},{id:'guide',l:'GUIDE'},
+  ];
+  return (
+    <div style={{
+      position:'sticky', bottom:0, background:T.bgVoid, borderTop:`1px solid ${T.borderSub}`,
+      display:'flex',
+    }}>
+      {items.map(item=>(
+        <button key={item.id} onClick={()=>setPage(item.id)} style={{
+          flex:1, padding:'11px 0', border:'none', cursor:'pointer',
+          background:'transparent', fontFamily:'IBM Plex Mono',
+          fontSize:8, letterSpacing:'0.1em', textTransform:'uppercase',
+          color: page===item.id ? T.textPri : T.textMuted,
+          borderTop: page===item.id ? `1px solid ${T.neon}` : '1px solid transparent',
+          marginTop:-1,
+        }}>{item.l}</button>
+      ))}
+    </div>
+  );
+}
+
+// ── APP ───────────────────────────────────────────────────
+function App() {
+  const [page, setPage] = useState('home');
+  const [se, setSE] = useState(null);
+  const [sa, setSA] = useState(null);
+  const showBottom = !['event-detail','artist-detail'].includes(page);
+
+  const renderPage = () => {
+    switch(page) {
+      case 'home':          return <HomePage setPage={setPage} setSE={setSE}/>;
+      case 'events':        return <EventsPage setPage={setPage} setSE={setSE}/>;
+      case 'event-detail':  return <EventDetail ev={se} setPage={setPage}/>;
+      case 'artists':       return <ArtistsPage setPage={setPage} setSA={setSA}/>;
+      case 'artist-detail': return <ArtistDetail artist={sa} setPage={setPage}/>;
+      case 'guide':         return <GuidePage/>;
+      default:              return <HomePage setPage={setPage} setSE={setSE}/>;
+    }
+  };
+
+  return (
+    <div style={{
+      maxWidth:430, margin:'0 auto', background:T.bgBase,
+      minHeight:'100vh', display:'flex', flexDirection:'column',
+      boxShadow:'0 0 60px rgba(0,0,0,0.6)',
+    }}>
+      <NavBar page={page} setPage={setPage}/>
+      <div style={{ flex:1, overflowY:'auto' }}>{renderPage()}</div>
+      {showBottom && <BottomNav page={page} setPage={setPage}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
