@@ -1,0 +1,4 @@
+[
+  {"id":"GRP-001","name":"BNK48","nameJapanese":"ビーエヌケー48","nameThai":"บีเอ็นเค48","concept":"会いに行けるアイドル","agency":"BNK48 Office","baseArea":"Bangkok","status":"active","genres":["J-POP系","Idol"],"socialLinks":{"x":true,"instagram":true,"youtube":true},"recommendedForJapaneseFans":true,"beginnerFriendly":true,"lastCheckedAt":"2026-05-18","imageUrl":"/images/idols/bnk48.jpg"},
+  {"id":"GRP-002","name":"SugarBite","nameJapanese":"シュガーバイト","nameThai":"ชูการ์ไบต์","concept":"キュート系","agency":"Sweet Production","baseArea":"Siam","status":"active","genres":["Cute","Pop"],"socialLinks":{"x":true,"instagram":true},"recommendedForJapaneseFans":true,"beginnerFriendly":true,"lastCheckedAt":"2026-05-18","imageUrl":"/images/idols/sugarbite.jpg"}
+]
