@@ -1,71 +1,59 @@
 "use client";
-import { useMemo, useState } from "react";
-import { birthdayItems, C, EVENTS, featureArticles, heroBanners, IDOLS, LAB_ARTICLES, LabArticle, newsItems, pickupItems, rankingItems, Event, Idol, VisualItem } from "@/lib/data";
 
-type Page = "home" | "events" | "idols" | "lab" | "guide" | "event-detail" | "idol-detail";
-const pill = "text-[10px] px-2 py-1 rounded-full border";
-const price = (e: Event) => e.isFree ? "無料" : `${e.ticketPriceMin} - ${e.ticketPriceMax} THB`;
+import { useState } from "react";
+import { birthdayItems, C, EVENTS, featureArticles, heroBanners, IDOLS, LAB_ARTICLES, newsItems, pickupItems, rankingItems, VisualItem } from "@/lib/data";
 
-const ImageCard = ({ item, className = "h-24" }: { item: VisualItem; className?: string }) => (
-  <div className="w-[150px] shrink-0">
-    <div className={`rounded-md border ${className}`} style={{ borderColor: C.border, background: item.imagePlaceholder }} />
-    <div className="text-[11px] mt-1 leading-tight">{item.title}</div>
+type Page = "home" | "events" | "idols" | "lab";
+
+const Img = ({ item, className }: { item: VisualItem; className: string }) => (
+  <div className="space-y-1">
+    <img src={item.imageUrl} alt={item.title} className={`w-full object-cover rounded-xl border ${className}`} style={{ borderColor: C.border }} />
+    <p className="text-xs font-medium leading-tight">{item.title}</p>
+    {item.subtitle && <p className="text-[11px] text-slate-500">{item.subtitle}</p>}
   </div>
 );
 
-function EventCard({ event, onClick }: { event: Event; onClick: (e: Event) => void }) {
-  return <div className="border rounded-lg bg-white p-3" style={{ borderColor: C.border }}>
-    <div className="flex gap-3">
-      <div className="w-14 rounded-md border text-center py-2" style={{ borderColor: C.primaryLight, background: C.primaryBg }}>
-        <div className="text-sm font-bold" style={{ color: C.primary }}>{event.date.slice(5).replace("-", "/")}</div><div className="text-[11px]" style={{ color: C.textSub }}>{event.startTime}</div>
-      </div>
-      <div className="w-16 h-16 rounded border shrink-0" style={{ borderColor: "#facc15", background: event.imagePlaceholder }} />
-      <div className="flex-1"><div className="text-[13px] font-bold">{event.titleJapanese}</div><div className="text-[11px] text-slate-600 mt-1">{event.venueName} / {event.venueArea}</div><div className="text-[11px] mt-1">出演: {event.idolGroups.join(" / ")}</div><div className="text-[11px] text-slate-500 mt-1">{price(event)}</div></div>
-    </div><div className="mt-2 flex gap-2 flex-wrap">{event.tags.includes("beginner") && <span className={pill} style={{ borderColor: C.border }}>初心者向け</span>}{event.tags.includes("recommended") && <span className={pill} style={{ borderColor: C.border }}>日本人おすすめ</span>}{event.isFree && <span className={pill} style={{ borderColor: C.border }}>無料</span>}</div>
-    <div className="mt-3 flex gap-2"><button className="h-8 px-3 text-xs border rounded-md" style={{ borderColor: C.mapBlue, color: C.mapBlue }}>Map</button><button onClick={() => onClick(event)} className="h-8 px-3 text-xs rounded-md text-white" style={{ background: C.primary }}>Ticket / 詳細</button></div>
-  </div>;
-}
-
-const Section = ({ title, children, right }: { title: string; children: React.ReactNode; right?: React.ReactNode }) => <section className="bg-white border rounded-lg p-3" style={{ borderColor: C.border }}><div className="flex justify-between items-center mb-2"><h2 className="text-sm font-bold">{title}</h2>{right}</div>{children}</section>;
-
 export default function ThaIdolApp() {
-  const [page, setPage] = useState<Page>("home"); const [eventQ, setEventQ] = useState(""); const [idolQ, setIdolQ] = useState("");
-  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null); const [selectedIdol, setSelectedIdol] = useState<Idol | null>(null);
-  const [eventFilter, setEventFilter] = useState("all"); const [areaFilter, setAreaFilter] = useState("all"); const [tagFilter, setTagFilter] = useState("all"); const [sort, setSort] = useState("time");
-  const [labCategory, setLabCategory] = useState("all"); const [pickupTab, setPickupTab] = useState("group"); const [newsTab, setNewsTab] = useState("idol");
-  const today = "2026-05-19";
+  const [page, setPage] = useState<Page>("home");
+  const [heroIndex, setHeroIndex] = useState(0);
 
-  const events = useMemo(() => EVENTS.filter(e => {
-    if (eventQ && !(e.titleJapanese + e.venueName + e.idolGroups.join(" ")).toLowerCase().includes(eventQ.toLowerCase())) return false;
-    if (eventFilter === "today" && e.date !== today) return false; if (eventFilter === "tomorrow" && e.date !== "2026-05-20") return false; if (eventFilter === "weekend" && !["2026-05-24", "2026-05-25"].includes(e.date)) return false;
-    if (areaFilter !== "all" && e.venueArea !== areaFilter) return false; if (tagFilter === "beginner" && !e.tags.includes("beginner")) return false; if (tagFilter === "recommended" && !e.tags.includes("recommended")) return false; if (tagFilter === "free" && !e.isFree) return false; return true;
-  }).sort((a,b) => sort === "time" ? a.startTime.localeCompare(b.startTime) : b.lastCheckedAt.localeCompare(a.lastCheckedAt)), [eventQ,eventFilter,areaFilter,tagFilter,sort]);
-  const idols = useMemo(() => IDOLS.filter(i => (i.name+i.nameJapanese+i.nameThai+i.baseArea+i.genres.join(" ")).toLowerCase().includes(idolQ.toLowerCase())), [idolQ]);
+  return <div className="max-w-[1180px] mx-auto min-h-screen bg-[#fffafd] text-slate-900 px-3 md:px-6 pb-20">
+    <header className="sticky top-0 bg-[#fffafd]/95 backdrop-blur border-b z-20" style={{ borderColor: C.border }}>
+      <div className="h-14 flex items-center justify-between">
+        <div className="font-extrabold tracking-wide text-lg" style={{ color: C.primary }}>Thai Idol Navi</div>
+        <nav className="flex gap-4 text-sm">
+          {(["home", "events", "idols", "lab"] as Page[]).map((n) => <button key={n} onClick={() => setPage(n)} className={page === n ? "font-bold" : "text-slate-500"}>{n.toUpperCase()}</button>)}
+        </nav>
+      </div>
+    </header>
 
-  return <div className="max-w-[430px] mx-auto min-h-screen bg-[#f6f6f6] border" style={{ borderColor: C.border }}>
-    <header className="sticky top-0 bg-white border-b z-10" style={{ borderColor: C.border }}><div className="px-3 py-2 flex justify-between items-center"><button onClick={() => setPage("home")} className="text-sm font-extrabold" style={{ color: C.primary }}>ThaIdol.info</button><button className="text-[11px] underline" onClick={() => setPage("guide")}>掲載/修正</button></div><div className="px-3 pb-2 flex gap-3 overflow-x-auto text-[11px]"><button onClick={() => setPage("events")}>ライブを探す</button><button onClick={() => setPage("idols")}>グループを探す</button><button onClick={() => setPage("lab")}>Lab</button><button onClick={() => setPage("guide")}>ガイド</button></div></header>
+    {page === "home" && <main className="space-y-5 pt-4">
+      <section className="grid md:grid-cols-3 gap-3 items-stretch">
+        <div className="md:col-span-2 relative">
+          <img src={heroBanners[heroIndex].imageUrl} alt={heroBanners[heroIndex].title} className="h-56 md:h-80 w-full rounded-2xl object-cover" />
+          <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/60 to-transparent rounded-b-2xl text-white">
+            <p className="text-xl font-bold">{heroBanners[heroIndex].title}</p><p className="text-sm">{heroBanners[heroIndex].subtitle}</p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {heroBanners.map((b, i) => <button key={b.id} onClick={() => setHeroIndex(i)} className={`w-full text-left rounded-xl border p-2 text-xs ${heroIndex===i ? "bg-pink-50" : "bg-white"}`} style={{ borderColor: C.border }}>{b.title}</button>)}
+        </div>
+      </section>
 
-    <main className="pb-14 p-3 space-y-3">
-      {page === "home" && <>
-        <Section title="Bangkok Underground Idol Scene Guide"><div className="flex gap-2 overflow-x-auto"><div className="w-[88px] shrink-0"><div className="h-24 rounded-md border" style={{ borderColor: C.border, background: heroBanners[0].imagePlaceholder }} /></div><div className="w-[220px] shrink-0"><div className="h-28 rounded-md border" style={{ borderColor: C.border, background: heroBanners[1].imagePlaceholder }} /></div><div className="w-[88px] shrink-0"><div className="h-24 rounded-md border" style={{ borderColor: C.border, background: heroBanners[2].imagePlaceholder }} /></div></div><input className="mt-3 w-full h-10 rounded-md border px-3 text-sm" style={{ borderColor: C.primaryLight }} placeholder="グループ名・会場・イベント名で検索" value={eventQ} onChange={e=>setEventQ(e.target.value)} /></Section>
-        <div className="grid grid-cols-3 gap-2 text-[11px]">{[{t:"グループを探す",bg:"#a5f3fc"},{t:"アイドルを探す",bg:"#fbcfe8"},{t:"ライブを探す",bg:"#fde68a"}].map((b,i)=><button key={b.t} onClick={()=>setPage((["idols","idols","events"] as Page[])[i])} className="rounded-lg border p-2 text-left" style={{ borderColor:C.border, background:b.bg }}>{b.t}</button>)}</div>
-        <Section title="アクセスランキング"><div className="flex gap-2 overflow-x-auto">{rankingItems.map((r,idx)=><div key={r.id} className="w-[130px] shrink-0"><div className="text-[10px] font-bold" style={{ color:C.primary }}>{String(idx+1).padStart(2,"0")}</div><div className="h-24 rounded-md border" style={{ borderColor:C.border, background:r.imagePlaceholder }} /><div className="text-[11px] mt-1">{r.title}</div></div>)}</div></Section>
-        <Section title="開催予定のライブ"><div className="flex gap-2 overflow-x-auto">{EVENTS.map(e=><div key={e.id} className="w-[220px] shrink-0 rounded-md border p-2" style={{ borderColor:"#fcd34d", background:"#fef9c3" }}><div className="h-20 rounded border" style={{ borderColor:"#fcd34d", background:e.imagePlaceholder }} /><div className="text-[11px] mt-1 font-semibold">{e.titleJapanese}</div><div className="text-[10px]">{e.date} / {e.venueName}</div><div className="text-[10px]">出演: {e.idolGroups.join("/")}</div><div className="text-[10px]">{price(e)}</div></div>)}</div></Section>
-        <Section title="ピックアップ" right={<div className="text-[10px]"><button className="mr-2" onClick={()=>setPickupTab("group")} style={{ color:pickupTab==="group"?C.primary:C.textMuted }}>グループ</button><button onClick={()=>setPickupTab("idol")} style={{ color:pickupTab==="idol"?C.primary:C.textMuted }}>アイドル</button></div>}><div className="flex gap-2 overflow-x-auto">{pickupItems.map(p=><ImageCard key={p.id} item={p} />)}</div></Section>
-        <Section title="誕生日が近いアイドル"><div className="flex gap-2 overflow-x-auto">{birthdayItems.map(b=><ImageCard key={b.id} item={b} />)}</div></Section>
-        <Section title="新着情報" right={<div className="text-[10px]"><button className="mr-2" onClick={()=>setNewsTab("idol")} style={{ color:newsTab==="idol"?C.primary:C.textMuted }}>アイドル</button><button onClick={()=>setNewsTab("group")} style={{ color:newsTab==="group"?C.primary:C.textMuted }}>グループ</button></div>}><div className="flex gap-2 overflow-x-auto">{newsItems.map(n=><ImageCard key={n.id} item={n} />)}</div></Section>
-        <Section title="特集記事"><div className="flex gap-2 overflow-x-auto">{featureArticles.map(f=><div key={f.id} className="w-[180px] shrink-0"><div className="h-24 rounded-md border" style={{ borderColor:C.border, background:f.imagePlaceholder }} /><div className="text-[11px] mt-1">{f.title}</div></div>)}</div></Section>
-        <div className="grid grid-cols-3 gap-2 text-[11px]">{[{t:"グループを探す",bg:"#67e8f9"},{t:"アイドルを探す",bg:"#f9a8d4"},{t:"ライブを探す",bg:"#facc15"}].map((b,i)=><button key={b.t} onClick={()=>setPage((["idols","idols","events"] as Page[])[i])} className="rounded-lg border p-3 text-left font-semibold" style={{ borderColor:C.border, background:b.bg }}>{b.t}</button>)}</div>
-      </>}
+      <section className="grid md:grid-cols-4 gap-3">
+        <div className="md:col-span-2 border rounded-2xl p-3 bg-white" style={{ borderColor: C.border }}><h2 className="font-bold mb-2">Pickup</h2><div className="grid grid-cols-2 gap-3">{pickupItems.map(i => <Img key={i.id} item={i} className="h-32" />)}</div></div>
+        <div className="border rounded-2xl p-3 bg-white" style={{ borderColor: C.border }}><h2 className="font-bold mb-2">Ranking</h2><div className="space-y-2">{rankingItems.map((i,idx)=><div key={i.id} className="flex gap-2"><span className="text-xs font-bold text-pink-500">#{idx+1}</span><img src={i.imageUrl} alt={i.title} className="w-14 h-14 rounded object-cover"/><div className="text-xs">{i.title}</div></div>)}</div></div>
+        <div className="border rounded-2xl p-3 bg-white" style={{ borderColor: C.border }}><h2 className="font-bold mb-2">Birthday</h2><div className="space-y-2">{birthdayItems.map(i=><Img key={i.id} item={i} className="h-20" />)}</div></div>
+      </section>
 
-      {page === "events" && <><h2 className="text-sm font-bold">ライブ一覧</h2><input className="w-full h-9 rounded-md border px-3 text-sm" placeholder="イベント名・会場・グループ名" value={eventQ} onChange={e=>setEventQ(e.target.value)} /><div className="flex gap-1 overflow-x-auto text-[10px]">{["all","today","tomorrow","weekend","month"].map(v=><button key={v} onClick={()=>setEventFilter(v)} className={pill} style={{ borderColor:C.border, background:eventFilter===v?C.primaryBg:"white" }}>{v}</button>)}</div><div className="flex gap-1 overflow-x-auto text-[10px]">{["all","Bangkok","Siam","Thonglor","Ratchada","Chiang Mai"].map(v=><button key={v} onClick={()=>setAreaFilter(v)} className={pill} style={{ borderColor:C.border }}>{v}</button>)}</div><div className="flex gap-1 text-[10px]">{["all","beginner","recommended","free"].map(v=><button key={v} onClick={()=>setTagFilter(v)} className={pill} style={{ borderColor:C.border }}>{v}</button>)}</div><select className="h-8 text-xs border rounded px-2" value={sort} onChange={e=>setSort(e.target.value)}><option value="time">開演時間が早い順</option><option value="new">新着順</option></select><div className="text-[11px] text-slate-600">{events.length}件</div><div className="space-y-2">{events.map(e=><EventCard key={e.id} event={e} onClick={(ev)=>{setSelectedEvent(ev);setPage("event-detail");}} />)}</div></>}
-      {page === "idols" && <><h2 className="text-sm font-bold">グループ検索</h2><input className="w-full h-9 rounded-md border px-3 text-sm" placeholder="グループ名・エリア・ジャンル" value={idolQ} onChange={e=>setIdolQ(e.target.value)} /><div className="text-[11px] text-slate-600">{idols.length}件</div>{idols.map(i=><div key={i.id} className="bg-white border rounded-lg p-3 mb-2" style={{ borderColor:C.border }}><div className="h-12 rounded border" style={{ borderColor:C.primaryLight, background:i.imagePlaceholder }}></div><div className="mt-2 text-sm font-bold">{i.name}</div><div className="text-[11px] text-slate-600">{i.nameJapanese} / {i.nameThai}</div><div className="text-[11px]">{i.baseArea}・{i.genres.join("/")}</div><div className="text-[11px]">出演予定 {EVENTS.filter(e=>e.idolGroups.includes(i.name)).length}件</div><button className="mt-2 h-8 px-3 rounded-md text-xs text-white" style={{ background:C.primary }} onClick={()=>{setSelectedIdol(i);setPage("idol-detail");}}>詳細を見る</button></div>)}</>}
-      {page === "lab" && <><h2 className="text-sm font-bold">Idol Growth Lab</h2><p className="text-[11px] text-slate-600">タイ地下アイドルのための、日本式アイドル文化ノウハウ</p><div className="flex gap-1 overflow-x-auto text-[10px]">{["all",...Array.from(new Set(LAB_ARTICLES.map(a=>a.category)))].map(c=><button key={c} className={pill} onClick={()=>setLabCategory(c)} style={{ borderColor:C.border }}>{c}</button>)}</div>{LAB_ARTICLES.filter(a=>labCategory==="all"||a.category===labCategory).map((a:LabArticle)=><div key={a.id} className="bg-white border rounded-lg p-3 mt-2" style={{ borderColor:C.border }}><div className="h-14 rounded border mb-2" style={{ borderColor:C.border, background:a.imagePlaceholder }} /><div className="text-[10px]" style={{ color:C.primary }}>{a.category}</div><div className="text-[13px] font-semibold">{a.titleJapanese}</div><div className="text-[11px] text-slate-600">{a.summaryJapanese}</div><div className="text-[10px] mt-1">対象: {a.target.join(", ")} / {a.readTime} / {a.language.join("+")}</div><div className="text-[11px] mt-2 p-2 rounded" style={{ background:C.primaryBg }}>{a.contentJapanese}</div></div>)}</>}
-      {page === "guide" && <div><h2 className="text-sm font-bold">初心者ガイド</h2><p className="text-[12px]">ファン向け現場ガイド（Guide）ページです。</p></div>}
-      {page === "event-detail" && selectedEvent && <div className="space-y-2"><h2 className="text-base font-bold">{selectedEvent.titleJapanese}</h2><div className="bg-white border rounded p-3 text-[12px]">日付 {selectedEvent.date} / 開場 {selectedEvent.openTime} / 開演 {selectedEvent.startTime}<br/>会場 {selectedEvent.venueName}<br/>価格 {price(selectedEvent)}<br/>出演 {selectedEvent.idolGroups.join(" / ")}<br/>最終確認 {selectedEvent.lastCheckedAt}</div><div className="flex gap-2"><button className="h-8 px-3 border rounded">Map</button><button className="h-8 px-3 rounded text-white" style={{ background:C.primary }}>チケット</button></div><button onClick={()=>setPage("events")} className="text-xs underline">一覧へ戻る</button></div>}
-      {page === "idol-detail" && selectedIdol && <div className="space-y-2"><h2 className="text-base font-bold">{selectedIdol.name}</h2><div className="bg-white border rounded p-3 text-[12px]">{selectedIdol.nameJapanese} / {selectedIdol.nameThai}<br/>コンセプト: {selectedIdol.concept}<br/>所属: {selectedIdol.agency}<br/>活動拠点: {selectedIdol.baseArea}<br/>SNS: {Object.keys(selectedIdol.socialLinks).join(", ")}<br/>出演予定: {EVENTS.filter(e=>e.idolGroups.includes(selectedIdol.name)).length}件<br/>最終確認: {selectedIdol.lastCheckedAt}</div><button onClick={()=>setPage("idols")} className="text-xs underline">一覧へ戻る</button></div>}
-    </main>
+      <section className="grid md:grid-cols-3 gap-3">
+        <div className="md:col-span-2 border rounded-2xl p-3 bg-white" style={{ borderColor: C.border }}><h2 className="font-bold mb-2">News</h2><div className="grid sm:grid-cols-2 gap-3">{newsItems.map(i=><Img key={i.id} item={i} className="h-28" />)}</div></div>
+        <div className="border rounded-2xl p-3 bg-white" style={{ borderColor: C.border }}><h2 className="font-bold mb-2">Feature Article</h2><div className="space-y-3">{featureArticles.map(i=><Img key={i.id} item={i} className="h-24" />)}</div></div>
+      </section>
+    </main>}
 
-    <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white border-t grid grid-cols-5 h-12" style={{ borderColor: C.border }}>{[{id:"home",l:"Home"},{id:"events",l:"Live"},{id:"idols",l:"Idols"},{id:"lab",l:"Lab"},{id:"guide",l:"Guide"}].map(n=><button key={n.id} onClick={()=>setPage(n.id as Page)} className="text-[11px]" style={{ color: page===n.id?C.primary:C.textMuted }}>{n.l}</button>)}</nav>
+    {page === "events" && <section className="pt-4"><h2 className="text-lg font-bold mb-3">Live Schedule</h2><div className="grid md:grid-cols-2 gap-3">{EVENTS.map(e=><article key={e.id} className="border rounded-xl p-3 bg-white" style={{ borderColor: C.border }}><img src={e.imageUrl} alt={e.titleJapanese} className="h-36 w-full rounded object-cover"/><h3 className="font-semibold mt-2">{e.titleJapanese}</h3><p className="text-xs">{e.date} {e.startTime} / {e.venueName}</p></article>)}</div></section>}
+    {page === "idols" && <section className="pt-4"><h2 className="text-lg font-bold mb-3">Idol Groups</h2><div className="grid md:grid-cols-3 gap-3">{IDOLS.map(i=><article key={i.id} className="border rounded-xl p-3 bg-white" style={{ borderColor: C.border }}><img src={i.imageUrl} alt={i.name} className="h-40 w-full rounded object-cover"/><h3 className="font-semibold mt-2">{i.name}</h3><p className="text-xs">{i.nameJapanese} / {i.baseArea}</p></article>)}</div></section>}
+    {page === "lab" && <section className="pt-4"><h2 className="text-lg font-bold mb-3">Lab</h2><div className="grid md:grid-cols-2 gap-3">{LAB_ARTICLES.map(a=><article key={a.id} className="border rounded-xl p-3 bg-white" style={{ borderColor: C.border }}><img src={a.imageUrl} alt={a.titleJapanese} className="h-36 w-full rounded object-cover"/><p className="text-[11px] text-pink-600 mt-2">{a.category}</p><h3 className="font-semibold">{a.titleJapanese}</h3><p className="text-xs text-slate-600">{a.summaryJapanese}</p></article>)}</div></section>}
   </div>;
 }
