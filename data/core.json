@@ -10,7 +10,10 @@
       "startTime": "18:00",
       "venueName": "RCA Plaza",
       "venueArea": "Bangkok",
-      "idolGroups": ["SugarBite", "Candy Pop"],
+      "idolGroups": [
+        "SugarBite",
+        "Candy Pop"
+      ],
       "ticketPriceMin": 300,
       "ticketPriceMax": 500,
       "ticketUrl": "https://example.com/ticket/candy-parade",
@@ -19,7 +22,14 @@
       "lastCheckedAt": "2026-05-19",
       "notes": "開演10分前までに入場推奨。",
       "isFree": false,
-      "tags": ["recommended", "beginner", "jpFriendly", "taiban", "bangkok", "cheki"],
+      "tags": [
+        "recommended",
+        "beginner",
+        "jpFriendly",
+        "taiban",
+        "bangkok",
+        "cheki"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80"
     },
     {
@@ -32,7 +42,11 @@
       "startTime": "14:00",
       "venueName": "Siam Square One",
       "venueArea": "Siam",
-      "idolGroups": ["Rosé Girls", "Candy Pop", "SugarBite"],
+      "idolGroups": [
+        "Rosé Girls",
+        "Candy Pop",
+        "SugarBite"
+      ],
       "ticketPriceMin": 0,
       "ticketPriceMax": 0,
       "ticketUrl": "https://example.com/ticket/starlight-fes",
@@ -41,7 +55,13 @@
       "lastCheckedAt": "2026-05-20",
       "notes": "無料エリアは先着順。",
       "isFree": true,
-      "tags": ["beginner", "free", "siam", "kawaii", "recommended"],
+      "tags": [
+        "beginner",
+        "free",
+        "siam",
+        "kawaii",
+        "recommended"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=80"
     }
   ],
@@ -55,11 +75,22 @@
       "concept": "会いに行ける王道アイドル",
       "agency": "BNK48 Office",
       "baseArea": "Bangkok",
-      "genres": ["J-POP系", "Idol"],
-      "socialLinks": {"x": "https://x.com/", "instagram": "https://instagram.com/"},
+      "genres": [
+        "J-POP系",
+        "Idol"
+      ],
+      "socialLinks": {
+        "x": "https://x.com/",
+        "instagram": "https://instagram.com/"
+      },
       "jpNote": "日本語情報が比較的見つけやすい。",
       "beginnerNote": "大型会場イベントが多く初見参加しやすい。",
-      "tags": ["beginner", "jpFriendly", "orthodox", "bangkok"],
+      "tags": [
+        "beginner",
+        "jpFriendly",
+        "orthodox",
+        "bangkok"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=700&q=80"
     },
     {
@@ -71,12 +102,73 @@
       "concept": "かわいい系 + 楽曲派",
       "agency": "Sweet Production",
       "baseArea": "Siam",
-      "genres": ["Cute", "Pop"],
-      "socialLinks": {"x": "https://x.com/", "tiktok": "https://tiktok.com/"},
+      "genres": [
+        "Cute",
+        "Pop"
+      ],
+      "socialLinks": {
+        "x": "https://x.com/",
+        "tiktok": "https://tiktok.com/"
+      },
       "jpNote": "日本式の特典会に近い導線あり。",
       "beginnerNote": "対バン出演が多く短時間で雰囲気を掴める。",
-      "tags": ["beginner", "kawaii", "songFocused", "siam", "japanStyle"],
+      "tags": [
+        "beginner",
+        "kawaii",
+        "songFocused",
+        "siam",
+        "japanStyle"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=700&q=80"
+    }
+  ],
+  "fanArticles": [
+    {
+      "id": "fan-001",
+      "slug": "first-live-guide",
+      "category": "現場ガイド",
+      "titleJapanese": "初めてのタイ現場ガイド",
+      "titleThai": "พื้นฐานการสื่อสารหน้าเชกิ",
+      "target": [
+        "fan",
+        "beginner"
+      ],
+      "readTime": "5分",
+      "language": [
+        "ja",
+        "th"
+      ],
+      "summaryJapanese": "初見参加の流れと持ち物を整理",
+      "contentJapanese": "入場前の確認、物販、特典会までの流れを時系列で把握しよう。",
+      "contentThai": "การสื่อสารหน้าเชกิช่วยเปลี่ยนผู้ชมใหม่ให้เป็นแฟนประจำ",
+      "tags": [
+        "beginner",
+        "free",
+        "japanStyle"
+      ],
+      "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"
+    },
+    {
+      "id": "fan-002",
+      "slug": "cheki-manners",
+      "category": "特典会マナー",
+      "titleJapanese": "チェキ会マナー入門",
+      "titleThai": "โครงสร้าง MC ในงานไทบัน",
+      "target": [
+        "fan"
+      ],
+      "readTime": "6分",
+      "language": [
+        "ja"
+      ],
+      "summaryJapanese": "推しにも運営にも優しい行動指針",
+      "contentJapanese": "時間を守り、伝えたいことを短く準備すると満足度が上がる。",
+      "contentThai": "",
+      "tags": [
+        "cheki",
+        "beginner"
+      ],
+      "imageUrl": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80"
     }
   ],
   "labArticles": [
@@ -86,13 +178,24 @@
       "category": "特典会・チェキ",
       "titleJapanese": "チェキ対応の基礎",
       "titleThai": "พื้นฐานการสื่อสารหน้าเชกิ",
-      "target": ["idol", "management", "beginner"],
+      "target": [
+        "idol",
+        "management",
+        "beginner"
+      ],
       "readTime": "5分",
-      "language": ["ja", "th"],
+      "language": [
+        "ja",
+        "th"
+      ],
       "summaryJapanese": "初見ファンを常連化する導線",
       "contentJapanese": "認知形成の起点は現場対応。名前確認→短い会話→次回導線を設計する。",
       "contentThai": "การสื่อสารหน้าเชกิช่วยเปลี่ยนผู้ชมใหม่ให้เป็นแฟนประจำ",
-      "tags": ["beginner", "japanStyle", "cheki"],
+      "tags": [
+        "beginner",
+        "japanStyle",
+        "cheki"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"
     },
     {
@@ -101,13 +204,22 @@
       "category": "ライブ演出",
       "titleJapanese": "対バンで覚えてもらうMC設計",
       "titleThai": "โครงสร้าง MC ในงานไทบัน",
-      "target": ["idol", "management"],
+      "target": [
+        "idol",
+        "management"
+      ],
       "readTime": "6分",
-      "language": ["ja"],
+      "language": [
+        "ja"
+      ],
       "summaryJapanese": "短時間で印象を残すMCフレーム",
       "contentJapanese": "冒頭15秒で自己紹介、最後にSNS誘導を明確化。",
       "contentThai": "",
-      "tags": ["taiban", "beginner", "japanStyle"],
+      "tags": [
+        "taiban",
+        "beginner",
+        "japanStyle"
+      ],
       "imageUrl": "https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=900&q=80"
     }
   ]
