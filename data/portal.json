@@ -1,0 +1,29 @@
+{
+  "heroBanners": [
+    {"id":"h1","title":"Thai Underground Weekend Navigator","subtitle":"今週末に行ける対バンを一気に検索","imageUrl":"https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=1400&q=80"},
+    {"id":"h2","title":"Beginner Friendly Live Guide","subtitle":"初見歓迎現場をピックアップ","imageUrl":"https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=1400&q=80"},
+    {"id":"h3","title":"Bangkok Idol City Topics","subtitle":"今日のニュースと特集をチェック","imageUrl":"https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=1400&q=80"}
+  ],
+  "rankingItems":[
+    {"id":"r1","title":"Miu Ayase","subtitle":"Weekly Ranking","imageUrl":"https://images.unsplash.com/photo-1516280440614-37939bbacd81?auto=format&fit=crop&w=500&q=80"},
+    {"id":"r2","title":"Hikari Rin","subtitle":"Weekly Ranking","imageUrl":"https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=500&q=80"},
+    {"id":"r3","title":"Nana Airi","subtitle":"Weekly Ranking","imageUrl":"https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=500&q=80"},
+    {"id":"r4","title":"Yui Komachi","subtitle":"Weekly Ranking","imageUrl":"https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=500&q=80"}
+  ],
+  "pickupItems":[
+    {"id":"p1","title":"SugarBite","subtitle":"今月の注目","imageUrl":"https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=700&q=80"},
+    {"id":"p2","title":"AsIs","subtitle":"急上昇","imageUrl":"https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=700&q=80"}
+  ],
+  "birthdayItems":[
+    {"id":"b1","title":"Kanon Masaka","subtitle":"05/23","imageUrl":"https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=500&q=80"},
+    {"id":"b2","title":"Rina Yuzu","subtitle":"05/24","imageUrl":"https://images.unsplash.com/photo-1464863979621-258859e62245?auto=format&fit=crop&w=500&q=80"}
+  ],
+  "newsItems":[
+    {"id":"n1","title":"REVENI 新体制ライブ発表","subtitle":"2026-05-19","imageUrl":"https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=800&q=80"},
+    {"id":"n2","title":"AsIs 週末2マン開催","subtitle":"2026-05-20","imageUrl":"https://images.unsplash.com/photo-1461783436728-0a9217714694?auto=format&fit=crop&w=800&q=80"}
+  ],
+  "featureArticles":[
+    {"id":"f1","title":"バンコク遠征の歩き方","subtitle":"特集","imageUrl":"https://images.unsplash.com/photo-1501612780327-45045538702b?auto=format&fit=crop&w=1000&q=80"},
+    {"id":"f2","title":"チェキ文化を理解する","subtitle":"特集","imageUrl":"https://images.unsplash.com/photo-1459749411175-04bf5292ceea?auto=format&fit=crop&w=1000&q=80"}
+  ]
+}

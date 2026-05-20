@@ -1,0 +1,13 @@
+{
+  "events": [
+    {"id":"EVT-001","titleJapanese":"CANDY PARADE — Spring Edition","date":"2026-05-24","openTime":"17:30","startTime":"18:00","venueName":"RCA Plaza","venueArea":"Bangkok","idolGroups":["SugarBite","Candy Pop"],"ticketPriceMin":300,"ticketPriceMax":500,"isFree":false,"tags":["recommended","beginner"],"imageUrl":"https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=900&q=80"},
+    {"id":"EVT-002","titleJapanese":"STARLIGHT FES vol.8","date":"2026-05-25","openTime":"13:30","startTime":"14:00","venueName":"Siam Square One","venueArea":"Siam","idolGroups":["Rosé Girls","Candy Pop","SugarBite"],"ticketPriceMin":0,"ticketPriceMax":0,"isFree":true,"tags":["beginner","free"],"imageUrl":"https://images.unsplash.com/photo-1506157786151-b8491531f063?auto=format&fit=crop&w=900&q=80"}
+  ],
+  "idols": [
+    {"id":"GRP-001","name":"BNK48","nameJapanese":"ビーエヌケー48","baseArea":"Bangkok","genres":["J-POP系","Idol"],"imageUrl":"https://images.unsplash.com/photo-1521334884684-d80222895322?auto=format&fit=crop&w=700&q=80"},
+    {"id":"GRP-002","name":"SugarBite","nameJapanese":"シュガーバイト","baseArea":"Siam","genres":["Cute","Pop"],"imageUrl":"https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?auto=format&fit=crop&w=700&q=80"}
+  ],
+  "labArticles": [
+    {"id":"lab-001","category":"特典会・チェキ","titleJapanese":"チェキ対応の基礎","summaryJapanese":"初見ファンを常連化する導線","contentJapanese":"認知形成の起点は現場対応。","imageUrl":"https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=900&q=80"}
+  ]
+}
