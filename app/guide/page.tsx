@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { EVENTS } from "@/lib/data";
+const sections=["タイ地下アイドルライブとは","チケットの買い方","会場への行き方","チェキ文化","物販の流れ","コール/MIXについて","持ち物","注意点","日本人向けタイ語フレーズ","初心者におすすめのライブ条件"];
+export default function GuidePage(){return <main className='max-w-4xl mx-auto p-4 space-y-4'><h1 className='text-2xl font-bold'>初心者ガイド</h1><div className='grid md:grid-cols-2 gap-3'>{sections.map((s,i)=><article key={s} className='border rounded p-3'><p className='text-xs text-pink-600'>ステップ {i+1}</p><h2 className='font-semibold'>{s}</h2></article>)}</div><section className='border rounded p-3'><h2 className='font-semibold'>FAQ</h2><ul className='text-sm list-disc pl-5'><li>一人参加でも大丈夫？→ 初心者向けタグの現場がおすすめ。</li></ul></section><section className='border rounded p-3'><h2 className='font-semibold'>関連イベント</h2>{EVENTS.slice(0,2).map(e=><Link key={e.id} href={`/events/${e.slug}/`} className='block underline text-sm'>{e.titleJapanese}</Link>)}</section></main>}
